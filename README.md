@@ -1,6 +1,6 @@
 # solidtime-mcp-server
 
-[![CI](https://github.com/manuelernst/solidtime-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/manuelernst/solidtime-mcp-server/actions/workflows/ci.yml)
+[![CI](https://github.com/SwamiRama/solidtime-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/SwamiRama/solidtime-mcp-server/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm](https://img.shields.io/npm/v/solidtime-mcp-server)](https://www.npmjs.com/package/solidtime-mcp-server)
 
@@ -165,7 +165,7 @@ The authenticated user is not a member of the specified organization. Check `SOL
 ## Development
 
 ```bash
-git clone https://github.com/manuelernst/solidtime-mcp-server.git
+git clone https://github.com/SwamiRama/solidtime-mcp-server.git
 cd solidtime-mcp-server
 npm install
 npm run dev          # Run with tsx (dev mode)

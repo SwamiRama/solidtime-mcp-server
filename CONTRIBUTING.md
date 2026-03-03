@@ -5,7 +5,7 @@ Thanks for your interest in contributing to solidtime-mcp-server!
 ## Development Setup
 
 ```bash
-git clone https://github.com/manuelernst/solidtime-mcp-server.git
+git clone https://github.com/SwamiRama/solidtime-mcp-server.git
 cd solidtime-mcp-server
 npm install
 ```
