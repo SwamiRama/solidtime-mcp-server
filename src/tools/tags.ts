@@ -46,9 +46,14 @@ export function registerTagTools(server: McpServer, api: ApiClient, orgId: strin
       },
     },
     async (params) => {
-      const tag = await api.post<Tag>(API_PATHS.tags(orgId), { name: params.name });
+      const result = await api.post<{ data: Tag }>(API_PATHS.tags(orgId), { name: params.name });
       return {
-        content: [{ type: "text", text: `Tag created.\n\nID: ${tag.id}\nName: ${tag.name}` }],
+        content: [
+          {
+            type: "text",
+            text: `Tag created.\n\nID: ${result.data.id}\nName: ${result.data.name}`,
+          },
+        ],
       };
     }
   );
@@ -70,11 +75,16 @@ export function registerTagTools(server: McpServer, api: ApiClient, orgId: strin
       },
     },
     async (params) => {
-      const tag = await api.put<Tag>(API_PATHS.tag(orgId, params.id), {
+      const result = await api.put<{ data: Tag }>(API_PATHS.tag(orgId, params.id), {
         name: params.name,
       });
       return {
-        content: [{ type: "text", text: `Tag updated.\n\nID: ${tag.id}\nName: ${tag.name}` }],
+        content: [
+          {
+            type: "text",
+            text: `Tag updated.\n\nID: ${result.data.id}\nName: ${result.data.name}`,
+          },
+        ],
       };
     }
   );

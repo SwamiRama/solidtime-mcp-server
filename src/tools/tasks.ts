@@ -65,9 +65,9 @@ export function registerTaskTools(server: McpServer, api: ApiClient, orgId: stri
       };
       if (params.estimated_time !== undefined) body.estimated_time = params.estimated_time;
 
-      const task = await api.post<Task>(API_PATHS.tasks(orgId), body);
+      const result = await api.post<{ data: Task }>(API_PATHS.tasks(orgId), body);
       return {
-        content: [{ type: "text", text: `Task created.\n\n${formatTask(task)}` }],
+        content: [{ type: "text", text: `Task created.\n\n${formatTask(result.data)}` }],
       };
     }
   );
@@ -101,9 +101,9 @@ export function registerTaskTools(server: McpServer, api: ApiClient, orgId: stri
       if (params.is_done !== undefined) body.is_done = params.is_done;
       if (params.estimated_time !== undefined) body.estimated_time = params.estimated_time;
 
-      const task = await api.put<Task>(API_PATHS.task(orgId, params.id), body);
+      const result = await api.put<{ data: Task }>(API_PATHS.task(orgId, params.id), body);
       return {
-        content: [{ type: "text", text: `Task updated.\n\n${formatTask(task)}` }],
+        content: [{ type: "text", text: `Task updated.\n\n${formatTask(result.data)}` }],
       };
     }
   );

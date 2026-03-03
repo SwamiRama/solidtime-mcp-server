@@ -20,7 +20,8 @@ export async function createServer(config: ServerConfig) {
   const orgId = config.organizationId;
 
   // Resolve member_id at startup
-  const user = await api.get<User>(API_PATHS.me);
+  const userResponse = await api.get<{ data: User }>(API_PATHS.me);
+  const user = userResponse.data;
   const membersResponse = await api.get<PaginatedResponse<Member>>(API_PATHS.members(orgId));
   const members = membersResponse.data ?? [];
   const member = members.find((m) => m.user_id === user.id);

@@ -77,9 +77,9 @@ export function registerProjectTools(server: McpServer, api: ApiClient, orgId: s
       if (params.billable_rate !== undefined) body.billable_rate = params.billable_rate;
       if (params.estimated_time !== undefined) body.estimated_time = params.estimated_time;
 
-      const project = await api.post<Project>(API_PATHS.projects(orgId), body);
+      const result = await api.post<{ data: Project }>(API_PATHS.projects(orgId), body);
       return {
-        content: [{ type: "text", text: `Project created.\n\n${formatProject(project)}` }],
+        content: [{ type: "text", text: `Project created.\n\n${formatProject(result.data)}` }],
       };
     }
   );
@@ -125,9 +125,9 @@ export function registerProjectTools(server: McpServer, api: ApiClient, orgId: s
       if (params.billable_rate !== undefined) body.billable_rate = params.billable_rate;
       if (params.estimated_time !== undefined) body.estimated_time = params.estimated_time;
 
-      const project = await api.put<Project>(API_PATHS.project(orgId, params.id), body);
+      const result = await api.put<{ data: Project }>(API_PATHS.project(orgId, params.id), body);
       return {
-        content: [{ type: "text", text: `Project updated.\n\n${formatProject(project)}` }],
+        content: [{ type: "text", text: `Project updated.\n\n${formatProject(result.data)}` }],
       };
     }
   );

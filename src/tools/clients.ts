@@ -56,14 +56,14 @@ export function registerClientTools(server: McpServer, api: ApiClient, orgId: st
       },
     },
     async (params) => {
-      const client = await api.post<Client>(API_PATHS.clients(orgId), {
+      const result = await api.post<{ data: Client }>(API_PATHS.clients(orgId), {
         name: params.name,
       });
       return {
         content: [
           {
             type: "text",
-            text: `Client created.\n\nID: ${client.id}\nName: ${client.name}`,
+            text: `Client created.\n\nID: ${result.data.id}\nName: ${result.data.name}`,
           },
         ],
       };
@@ -87,14 +87,14 @@ export function registerClientTools(server: McpServer, api: ApiClient, orgId: st
       },
     },
     async (params) => {
-      const client = await api.put<Client>(API_PATHS.client(orgId, params.id), {
+      const result = await api.put<{ data: Client }>(API_PATHS.client(orgId, params.id), {
         name: params.name,
       });
       return {
         content: [
           {
             type: "text",
-            text: `Client updated.\n\nID: ${client.id}\nName: ${client.name}`,
+            text: `Client updated.\n\nID: ${result.data.id}\nName: ${result.data.name}`,
           },
         ],
       };

@@ -100,6 +100,17 @@ export class ApiClient {
     return this.request<T>("GET", path);
   }
 
+  async getOrNull<T>(path: string): Promise<T | null> {
+    try {
+      return await this.request<T>("GET", path);
+    } catch (err) {
+      if (err instanceof SolidTimeApiError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
   post<T>(path: string, body: unknown): Promise<T> {
     return this.request<T>("POST", path, body);
   }

@@ -18,7 +18,8 @@ export function registerUserTools(server: McpServer, api: ApiClient, getMemberId
       },
     },
     async () => {
-      const user = await api.get<User>(API_PATHS.me);
+      const response = await api.get<{ data: User }>(API_PATHS.me);
+      const user = response.data;
       const memberId = getMemberId();
       const text = [
         `Name: ${user.name}`,

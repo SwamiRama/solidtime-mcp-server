@@ -11,6 +11,11 @@ export function registerTimeEntryTools(
   orgId: string,
   getMemberId: () => string
 ) {
+  async function getActiveTimer(): Promise<TimeEntry | null> {
+    const response = await api.getOrNull<{ data: TimeEntry }>(API_PATHS.activeTimer);
+    return response?.data ?? null;
+  }
+
   // --- Get Active Timer ---
   server.registerTool(
     "solidtime_get_active_timer",
@@ -25,8 +30,8 @@ export function registerTimeEntryTools(
       },
     },
     async () => {
-      const entry = await api.get<TimeEntry | null>(API_PATHS.activeTimer);
-      if (!entry || !entry.id) {
+      const entry = await getActiveTimer();
+      if (!entry) {
         return { content: [{ type: "text", text: "No active timer." }] };
       }
       return { content: [{ type: "text", text: formatTimeEntry(entry) }] };
@@ -55,8 +60,8 @@ export function registerTimeEntryTools(
       },
     },
     async (params) => {
-      const existing = await api.get<TimeEntry | null>(API_PATHS.activeTimer);
-      if (existing && existing.id) {
+      const existing = await getActiveTimer();
+      if (existing) {
         return {
           content: [
             {
@@ -77,9 +82,9 @@ export function registerTimeEntryTools(
       if (params.description) body.description = params.description;
       if (params.tag_ids) body.tags = params.tag_ids;
 
-      const entry = await api.post<TimeEntry>(API_PATHS.timeEntries(orgId), body);
+      const result = await api.post<{ data: TimeEntry }>(API_PATHS.timeEntries(orgId), body);
       return {
-        content: [{ type: "text", text: `Timer started.\n\n${formatTimeEntry(entry)}` }],
+        content: [{ type: "text", text: `Timer started.\n\n${formatTimeEntry(result.data)}` }],
       };
     }
   );
@@ -98,16 +103,16 @@ export function registerTimeEntryTools(
       },
     },
     async () => {
-      const existing = await api.get<TimeEntry | null>(API_PATHS.activeTimer);
-      if (!existing || !existing.id) {
+      const existing = await getActiveTimer();
+      if (!existing) {
         return { content: [{ type: "text", text: "No active timer to stop." }] };
       }
 
-      const entry = await api.put<TimeEntry>(API_PATHS.timeEntry(orgId, existing.id), {
+      const result = await api.put<{ data: TimeEntry }>(API_PATHS.timeEntry(orgId, existing.id), {
         end: nowUTC(),
       });
       return {
-        content: [{ type: "text", text: `Timer stopped.\n\n${formatTimeEntry(entry)}` }],
+        content: [{ type: "text", text: `Timer stopped.\n\n${formatTimeEntry(result.data)}` }],
       };
     }
   );
@@ -225,9 +230,9 @@ export function registerTimeEntryTools(
       if (params.description) body.description = params.description;
       if (params.tag_ids) body.tags = params.tag_ids;
 
-      const entry = await api.post<TimeEntry>(API_PATHS.timeEntries(orgId), body);
+      const result = await api.post<{ data: TimeEntry }>(API_PATHS.timeEntries(orgId), body);
       return {
-        content: [{ type: "text", text: `Time entry created.\n\n${formatTimeEntry(entry)}` }],
+        content: [{ type: "text", text: `Time entry created.\n\n${formatTimeEntry(result.data)}` }],
       };
     }
   );
@@ -268,9 +273,12 @@ export function registerTimeEntryTools(
       if (params.billable !== undefined) body.billable = params.billable;
       if (params.tag_ids !== undefined) body.tags = params.tag_ids;
 
-      const entry = await api.put<TimeEntry>(API_PATHS.timeEntry(orgId, params.id), body);
+      const result = await api.put<{ data: TimeEntry }>(
+        API_PATHS.timeEntry(orgId, params.id),
+        body
+      );
       return {
-        content: [{ type: "text", text: `Time entry updated.\n\n${formatTimeEntry(entry)}` }],
+        content: [{ type: "text", text: `Time entry updated.\n\n${formatTimeEntry(result.data)}` }],
       };
     }
   );
