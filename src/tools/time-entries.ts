@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ApiClient } from "../api-client.js";
 import { API_PATHS, GROUP_BY_VALUES, PAGINATION } from "../constants.js";
+import { coerceBoolean, coerceUuidArray } from "../schemas.js";
 import { formatDuration, formatCurrency, formatDateTime, nowUTC } from "../formatting.js";
 import type { TimeEntry, TimeEntryReport, PaginatedResponse } from "../types.js";
 
@@ -49,8 +50,8 @@ export function registerTimeEntryTools(
         project_id: z.string().uuid().optional().describe("Project UUID"),
         task_id: z.string().uuid().optional().describe("Task UUID"),
         description: z.string().max(5000).optional().describe("What you're working on"),
-        billable: z.boolean().optional().describe("Whether this time is billable"),
-        tag_ids: z.array(z.string().uuid()).optional().describe("Array of tag UUIDs to attach"),
+        billable: coerceBoolean.optional().describe("Whether this time is billable"),
+        tag_ids: coerceUuidArray.optional().describe("Array of tag UUIDs to attach"),
       },
       annotations: {
         readOnlyHint: false,
@@ -134,10 +135,10 @@ export function registerTimeEntryTools(
         end: z.string().optional().describe("Filter: only entries ending before this UTC datetime"),
         active: z.enum(["true", "false"]).optional().describe("Filter by active/inactive"),
         billable: z.enum(["true", "false"]).optional().describe("Filter by billable status"),
-        project_ids: z.array(z.string().uuid()).optional().describe("Filter by project UUIDs"),
-        client_ids: z.array(z.string().uuid()).optional().describe("Filter by client UUIDs"),
-        task_ids: z.array(z.string().uuid()).optional().describe("Filter by task UUIDs"),
-        tag_ids: z.array(z.string().uuid()).optional().describe("Filter by tag UUIDs"),
+        project_ids: coerceUuidArray.optional().describe("Filter by project UUIDs"),
+        client_ids: coerceUuidArray.optional().describe("Filter by client UUIDs"),
+        task_ids: coerceUuidArray.optional().describe("Filter by task UUIDs"),
+        tag_ids: coerceUuidArray.optional().describe("Filter by tag UUIDs"),
         limit: z
           .number()
           .int()
@@ -208,8 +209,10 @@ export function registerTimeEntryTools(
         project_id: z.string().uuid().optional().describe("Project UUID"),
         task_id: z.string().uuid().optional().describe("Task UUID"),
         description: z.string().max(5000).optional().describe("What was done"),
-        billable: z.boolean().optional().describe("Whether this time is billable (default false)"),
-        tag_ids: z.array(z.string().uuid()).optional().describe("Array of tag UUIDs to attach"),
+        billable: coerceBoolean
+          .optional()
+          .describe("Whether this time is billable (default false)"),
+        tag_ids: coerceUuidArray.optional().describe("Array of tag UUIDs to attach"),
       },
       annotations: {
         readOnlyHint: false,
@@ -250,7 +253,7 @@ export function registerTimeEntryTools(
         project_id: z.string().uuid().optional().describe("New project UUID"),
         task_id: z.string().uuid().optional().describe("New task UUID"),
         description: z.string().max(5000).optional().describe("New description"),
-        billable: z.boolean().optional().describe("New billable status"),
+        billable: coerceBoolean.optional().describe("New billable status"),
         tag_ids: z
           .array(z.string().uuid())
           .optional()
@@ -320,11 +323,11 @@ export function registerTimeEntryTools(
           .optional()
           .describe("Filter: only entries starting after this UTC datetime"),
         end: z.string().optional().describe("Filter: only entries ending before this UTC datetime"),
-        project_ids: z.array(z.string().uuid()).optional().describe("Filter by project UUIDs"),
-        client_ids: z.array(z.string().uuid()).optional().describe("Filter by client UUIDs"),
+        project_ids: coerceUuidArray.optional().describe("Filter by project UUIDs"),
+        client_ids: coerceUuidArray.optional().describe("Filter by client UUIDs"),
         billable: z.enum(["true", "false"]).optional().describe("Filter by billable status"),
-        tag_ids: z.array(z.string().uuid()).optional().describe("Filter by tag UUIDs"),
-        member_ids: z.array(z.string().uuid()).optional().describe("Filter by member UUIDs"),
+        tag_ids: coerceUuidArray.optional().describe("Filter by tag UUIDs"),
+        member_ids: coerceUuidArray.optional().describe("Filter by member UUIDs"),
       },
       annotations: {
         readOnlyHint: true,

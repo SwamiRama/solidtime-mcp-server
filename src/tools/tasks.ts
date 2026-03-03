@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ApiClient } from "../api-client.js";
 import { API_PATHS } from "../constants.js";
+import { coerceBoolean } from "../schemas.js";
 import { formatDuration } from "../formatting.js";
 import type { Task, PaginatedResponse } from "../types.js";
 
@@ -80,7 +81,7 @@ export function registerTaskTools(server: McpServer, api: ApiClient, orgId: stri
       inputSchema: {
         id: z.string().uuid().describe("Task UUID to update"),
         name: z.string().min(1).optional().describe("New task name"),
-        is_done: z.boolean().optional().describe("Mark task as done or not done"),
+        is_done: coerceBoolean.optional().describe("Mark task as done or not done"),
         estimated_time: z
           .number()
           .int()

@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ApiClient } from "../api-client.js";
 import { API_PATHS } from "../constants.js";
+import { coerceBoolean } from "../schemas.js";
 import { formatCurrency, formatDuration } from "../formatting.js";
 import type { Project, PaginatedResponse } from "../types.js";
 
@@ -50,7 +51,7 @@ export function registerProjectTools(server: McpServer, api: ApiClient, orgId: s
           .string()
           .regex(/^#[0-9a-fA-F]{6}$/)
           .describe("Hex color (e.g. #4CAF50)"),
-        is_billable: z.boolean().describe("Whether time tracked to this project is billable"),
+        is_billable: coerceBoolean.describe("Whether time tracked to this project is billable"),
         client_id: z.string().uuid().optional().describe("Client UUID to assign"),
         billable_rate: z
           .number()
@@ -97,8 +98,8 @@ export function registerProjectTools(server: McpServer, api: ApiClient, orgId: s
           .regex(/^#[0-9a-fA-F]{6}$/)
           .optional()
           .describe("New hex color"),
-        is_billable: z.boolean().optional().describe("New billable status"),
-        is_archived: z.boolean().optional().describe("Archive or unarchive"),
+        is_billable: coerceBoolean.optional().describe("New billable status"),
+        is_archived: coerceBoolean.optional().describe("Archive or unarchive"),
         client_id: z.string().uuid().optional().describe("New client UUID"),
         billable_rate: z.number().int().min(0).optional().describe("New billable rate in cents"),
         estimated_time: z
