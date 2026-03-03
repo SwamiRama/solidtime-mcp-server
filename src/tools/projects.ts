@@ -49,10 +49,10 @@ export function registerProjectTools(server: McpServer, api: ApiClient, orgId: s
         name: z.string().min(1).describe("Project name"),
         color: z
           .string()
-          .regex(/^#[0-9a-fA-F]{6}$/)
-          .describe("Hex color (e.g. #4CAF50)"),
+          .regex(/^#[0-9a-f]{6}$/)
+          .describe("Hex color, lowercase (e.g. #4caf50)"),
         is_billable: coerceBoolean.describe("Whether time tracked to this project is billable"),
-        client_id: z.string().uuid().optional().describe("Client UUID to assign"),
+        client_id: z.string().uuid().describe("Client UUID to assign (required)"),
         billable_rate: z
           .number()
           .int()
@@ -73,8 +73,8 @@ export function registerProjectTools(server: McpServer, api: ApiClient, orgId: s
         name: params.name,
         color: params.color,
         is_billable: params.is_billable,
+        client_id: params.client_id,
       };
-      if (params.client_id) body.client_id = params.client_id;
       if (params.billable_rate !== undefined) body.billable_rate = params.billable_rate;
       if (params.estimated_time !== undefined) body.estimated_time = params.estimated_time;
 
@@ -95,9 +95,9 @@ export function registerProjectTools(server: McpServer, api: ApiClient, orgId: s
         name: z.string().min(1).optional().describe("New project name"),
         color: z
           .string()
-          .regex(/^#[0-9a-fA-F]{6}$/)
+          .regex(/^#[0-9a-f]{6}$/)
           .optional()
-          .describe("New hex color"),
+          .describe("New hex color, lowercase (e.g. #4caf50)"),
         is_billable: coerceBoolean.optional().describe("New billable status"),
         is_archived: coerceBoolean.optional().describe("Archive or unarchive"),
         client_id: z.string().uuid().optional().describe("New client UUID"),
@@ -117,14 +117,21 @@ export function registerProjectTools(server: McpServer, api: ApiClient, orgId: s
       },
     },
     async (params) => {
-      const body: Record<string, unknown> = {};
-      if (params.name !== undefined) body.name = params.name;
-      if (params.color !== undefined) body.color = params.color;
-      if (params.is_billable !== undefined) body.is_billable = params.is_billable;
+      // SolidTime API requires all fields on PUT, so fetch current state first
+      const current = await api.get<{ data: Project }>(API_PATHS.project(orgId, params.id));
+      const project = current.data;
+
+      const body: Record<string, unknown> = {
+        name: params.name ?? project.name,
+        color: params.color ?? project.color,
+        is_billable: params.is_billable ?? project.is_billable,
+        client_id: params.client_id ?? project.client_id,
+      };
       if (params.is_archived !== undefined) body.is_archived = params.is_archived;
-      if (params.client_id !== undefined) body.client_id = params.client_id;
       if (params.billable_rate !== undefined) body.billable_rate = params.billable_rate;
+      else if (project.billable_rate !== null) body.billable_rate = project.billable_rate;
       if (params.estimated_time !== undefined) body.estimated_time = params.estimated_time;
+      else if (project.estimated_time !== null) body.estimated_time = project.estimated_time;
 
       const result = await api.put<{ data: Project }>(API_PATHS.project(orgId, params.id), body);
       return {

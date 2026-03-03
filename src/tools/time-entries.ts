@@ -352,7 +352,8 @@ export function registerTimeEntryTools(
         params.member_ids.forEach((id) => query.append("filter[member_ids][]", id));
 
       const path = `${API_PATHS.timeEntryReport(orgId)}?${query.toString()}`;
-      const result = await api.get<TimeEntryReport>(path);
+      const response = await api.get<{ data: TimeEntryReport }>(path);
+      const result = response.data;
 
       if (!result.grouped_data || result.grouped_data.length === 0) {
         return { content: [{ type: "text", text: "No data for this report." }] };
