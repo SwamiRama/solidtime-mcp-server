@@ -26,7 +26,9 @@ export function registerUserTools(server: McpServer, api: ApiClient, getMemberId
         `Email: ${user.email}`,
         `Timezone: ${user.timezone}`,
         `Week starts: ${user.week_start}`,
+        `User ID: ${user.id}`,
         `Member ID: ${memberId}`,
+        "Note: time entries carry user_id; reports group by member_id. These differ.",
       ].join("\n");
 
       return { content: [{ type: "text", text }] };

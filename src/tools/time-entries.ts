@@ -139,6 +139,16 @@ export function registerTimeEntryTools(
         client_ids: coerceUuidArray.optional().describe("Filter by client UUIDs"),
         task_ids: coerceUuidArray.optional().describe("Filter by task UUIDs"),
         tag_ids: coerceUuidArray.optional().describe("Filter by tag UUIDs"),
+        member_ids: coerceUuidArray
+          .optional()
+          .describe(
+            "Filter by member UUIDs (client-side filter — the API ignores this filter server-side)"
+          ),
+        user_ids: coerceUuidArray
+          .optional()
+          .describe(
+            "Filter by user UUIDs (client-side filter — the API ignores this filter server-side)"
+          ),
         limit: z
           .number()
           .int()
@@ -178,16 +188,23 @@ export function registerTimeEntryTools(
       const path = `${API_PATHS.timeEntries(orgId)}?${query.toString()}`;
       const result = await api.get<PaginatedResponse<TimeEntry>>(path);
 
-      const entries = result.data ?? [];
+      // member_ids/user_ids filters are not supported server-side — filter here
+      const idFilters = [
+        ...(params.member_ids ?? []).map((id) => ({ field: "member_id", id })),
+        ...(params.user_ids ?? []).map((id) => ({ field: "user_id", id })),
+      ];
+      const entries = (result.data ?? []).filter((e) =>
+        idFilters.every(({ field, id }) => (e as unknown as Record<string, string>)[field] === id)
+      );
       if (entries.length === 0) {
         return { content: [{ type: "text", text: "No time entries found." }] };
       }
 
       const hasMore = entries.length === limit;
       const lines = entries.map((e, i) => `${i + 1 + offset}. ${formatTimeEntry(e)}`);
-      if (hasMore) {
+      if (hasMore || idFilters.length > 0) {
         lines.push(
-          `\n--- Showing ${entries.length} entries. Use offset=${offset + limit} to see more. ---`
+          `\n--- Showing ${entries.length} entries${idFilters.length > 0 ? " after client-side filter (retrieved up to " + limit + ")" : ""}. Use offset=${offset + limit} to see more. ---`
         );
       }
       lines.unshift(`Found ${entries.length} time entries:\n`);
@@ -359,8 +376,18 @@ export function registerTimeEntryTools(
         return { content: [{ type: "text", text: "No data for this report." }] };
       }
 
+      // member_ids filter is not supported server-side — filter grouped keys here
+      // (only meaningful when grouping by member/user; otherwise keys are project/task/... ids)
+      const filteredData =
+        params.member_ids && params.member_ids.length > 0
+          ? result.grouped_data.filter((g) => params.member_ids!.includes(g.key))
+          : result.grouped_data;
+      if (filteredData.length === 0) {
+        return { content: [{ type: "text", text: "No data for this report." }] };
+      }
+
       const lines = [`Report grouped by: ${result.grouped_type}\n`];
-      for (const group of result.grouped_data) {
+      for (const group of filteredData) {
         const duration = formatDuration(group.seconds);
         const cost = group.cost > 0 ? ` (${formatCurrency(group.cost)})` : "";
         lines.push(`${group.key}: ${duration}${cost}`);
@@ -392,6 +419,7 @@ function formatTimeEntry(entry: TimeEntry): string {
     parts.push(`Duration: ${formatDuration(entry.duration)}`);
   }
   parts.push(`Billable: ${entry.billable ? "Yes" : "No"}`);
+  if (entry.user_id) parts.push(`User ID: ${entry.user_id}`);
   if (entry.project_id) parts.push(`Project ID: ${entry.project_id}`);
   if (entry.task_id) parts.push(`Task ID: ${entry.task_id}`);
   if (entry.tags && entry.tags.length > 0) parts.push(`Tags: ${entry.tags.join(", ")}`);
